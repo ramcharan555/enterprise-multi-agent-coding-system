@@ -1,0 +1,30 @@
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.vscode/
+.idea/
+*.log
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+# Private/test certificate keys
+*.key

@@ -1,0 +1,242 @@
+{
+  "name": "requests",
+  "path": "C:\\Users\\panth\\OneDrive\\Pictures\\Documents\\enterprise-coding-agent\\repositories\\requests",
+  "git": {
+    "is_git_repository": true,
+    "branch": "main",
+    "commit": "8f8b212de8c2129d7954c6cd373762880375620a",
+    "remote_url": "https://github.com/psf/requests.git"
+  },
+  "statistics": {
+    "total_files": 37,
+    "total_bytes": 419159,
+    "total_lines": 12032,
+    "languages": {
+      "Python": 37
+    }
+  },
+  "files": [
+    {
+      "path": "docs/_themes/flask_theme_support.py",
+      "language": "Python",
+      "size_bytes": 4961,
+      "line_count": 86
+    },
+    {
+      "path": "docs/conf.py",
+      "language": "Python",
+      "size_bytes": 12533,
+      "line_count": 385
+    },
+    {
+      "path": "setup.py",
+      "language": "Python",
+      "size_bytes": 188,
+      "line_count": 9
+    },
+    {
+      "path": "src/requests/__init__.py",
+      "language": "Python",
+      "size_bytes": 5856,
+      "line_count": 219
+    },
+    {
+      "path": "src/requests/__version__.py",
+      "language": "Python",
+      "size_bytes": 449,
+      "line_count": 14
+    },
+    {
+      "path": "src/requests/_internal_utils.py",
+      "language": "Python",
+      "size_bytes": 1593,
+      "line_count": 51
+    },
+    {
+      "path": "src/requests/_types.py",
+      "language": "Python",
+      "size_bytes": 6229,
+      "line_count": 188
+    },
+    {
+      "path": "src/requests/adapters.py",
+      "language": "Python",
+      "size_bytes": 28740,
+      "line_count": 748
+    },
+    {
+      "path": "src/requests/api.py",
+      "language": "Python",
+      "size_bytes": 7332,
+      "line_count": 180
+    },
+    {
+      "path": "src/requests/auth.py",
+      "language": "Python",
+      "size_bytes": 12461,
+      "line_count": 354
+    },
+    {
+      "path": "src/requests/certs.py",
+      "language": "Python",
+      "size_bytes": 448,
+      "line_count": 18
+    },
+    {
+      "path": "src/requests/compat.py",
+      "language": "Python",
+      "size_bytes": 2609,
+      "line_count": 115
+    },
+    {
+      "path": "src/requests/cookies.py",
+      "language": "Python",
+      "size_bytes": 22129,
+      "line_count": 625
+    },
+    {
+      "path": "src/requests/exceptions.py",
+      "language": "Python",
+      "size_bytes": 4726,
+      "line_count": 162
+    },
+    {
+      "path": "src/requests/help.py",
+      "language": "Python",
+      "size_bytes": 4200,
+      "line_count": 132
+    },
+    {
+      "path": "src/requests/hooks.py",
+      "language": "Python",
+      "size_bytes": 1186,
+      "line_count": 48
+    },
+    {
+      "path": "src/requests/models.py",
+      "language": "Python",
+      "size_bytes": 42646,
+      "line_count": 1184
+    },
+    {
+      "path": "src/requests/packages.py",
+      "language": "Python",
+      "size_bytes": 927,
+      "line_count": 23
+    },
+    {
+      "path": "src/requests/sessions.py",
+      "language": "Python",
+      "size_bytes": 34992,
+      "line_count": 920
+    },
+    {
+      "path": "src/requests/status_codes.py",
+      "language": "Python",
+      "size_bytes": 4479,
+      "line_count": 128
+    },
+    {
+      "path": "src/requests/structures.py",
+      "language": "Python",
+      "size_bytes": 4264,
+      "line_count": 130
+    },
+    {
+      "path": "src/requests/utils.py",
+      "language": "Python",
+      "size_bytes": 37216,
+      "line_count": 1155
+    },
+    {
+      "path": "tests/__init__.py",
+      "language": "Python",
+      "size_bytes": 483,
+      "line_count": 14
+    },
+    {
+      "path": "tests/compat.py",
+      "language": "Python",
+      "size_bytes": 503,
+      "line_count": 23
+    },
+    {
+      "path": "tests/conftest.py",
+      "language": "Python",
+      "size_bytes": 2001,
+      "line_count": 67
+    },
+    {
+      "path": "tests/test_adapters.py",
+      "language": "Python",
+      "size_bytes": 322,
+      "line_count": 8
+    },
+    {
+      "path": "tests/test_help.py",
+      "language": "Python",
+      "size_bytes": 866,
+      "line_count": 27
+    },
+    {
+      "path": "tests/test_hooks.py",
+      "language": "Python",
+      "size_bytes": 446,
+      "line_count": 22
+    },
+    {
+      "path": "tests/test_lowlevel.py",
+      "language": "Python",
+      "size_bytes": 15771,
+      "line_count": 428
+    },
+    {
+      "path": "tests/test_packages.py",
+      "language": "Python",
+      "size_bytes": 242,
+      "line_count": 13
+    },
+    {
+      "path": "tests/test_requests.py",
+      "language": "Python",
+      "size_bytes": 111628,
+      "line_count": 3094
+    },
+    {
+      "path": "tests/test_structures.py",
+      "language": "Python",
+      "size_bytes": 2848,
+      "line_count": 91
+    },
+    {
+      "path": "tests/test_testserver.py",
+      "language": "Python",
+      "size_bytes": 5712,
+      "line_count": 165
+    },
+    {
+      "path": "tests/test_utils.py",
+      "language": "Python",
+      "size_bytes": 32467,
+      "line_count": 1013
+    },
+    {
+      "path": "tests/testserver/__init__.py",
+      "language": "Python",
+      "size_bytes": 0,
+      "line_count": 0
+    },
+    {
+      "path": "tests/testserver/server.py",
+      "language": "Python",
+      "size_bytes": 5323,
+      "line_count": 176
+    },
+    {
+      "path": "tests/utils.py",
+      "language": "Python",
+      "size_bytes": 383,
+      "line_count": 17
+    }
+  ]
+}
