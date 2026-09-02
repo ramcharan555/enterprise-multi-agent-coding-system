@@ -9,7 +9,6 @@ from .relationships import RelationshipExtractor
 
 
 PYTHON_LANGUAGE = Language(tree_sitter_python.language())
-VALID_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 class PythonParser:
@@ -24,11 +23,8 @@ class PythonParser:
             errors="ignore",
         )
 
-        tree = self.parser.parse(source.encode("utf-8"))
-
-        relationship_data = self.relationships.extract(
-            tree,
-            source,
+        tree = self.parser.parse(
+            source.encode("utf-8")
         )
 
         chunks = []
@@ -43,11 +39,6 @@ class PythonParser:
 
         self._update_children(chunks)
 
-        self._apply_relationships(
-            chunks,
-            relationship_data,
-        )
-
         return chunks
 
     def _walk(
@@ -59,24 +50,19 @@ class PythonParser:
         parent,
     ):
         if node.type == "class_definition":
-            name_node = node.child_by_field_name("name")
+
+            name_node = node.child_by_field_name(
+                "name"
+            )
 
             if (
                 name_node is not None
                 and name_node.type == "identifier"
             ):
-                name = self._text(name_node, source)
-
-                if not VALID_NAME.fullmatch(name):
-                    for child in node.children:
-                        self._walk(
-                            child,
-                            source,
-                            relative_path,
-                            chunks,
-                            parent,
-                        )
-                    return
+                name = self._text(
+                    name_node,
+                    source,
+                )
 
                 chunk_id = self._make_id(
                     relative_path,
@@ -84,14 +70,13 @@ class PythonParser:
                     name,
                 )
 
-                chunk = CodeChunk(
+                chunk = self._create_chunk(
+                    node=node,
+                    source=source,
+                    relative_path=relative_path,
                     chunk_id=chunk_id,
                     chunk_type="class",
                     name=name,
-                    file_path=relative_path,
-                    start_line=node.start_point[0] + 1,
-                    end_line=node.end_point[0] + 1,
-                    source=self._text(node, source),
                     parent=parent,
                 )
 
@@ -112,15 +97,24 @@ class PythonParser:
             "function_definition",
             "async_function_definition",
         }:
-            name_node = node.child_by_field_name("name")
+
+            name_node = node.child_by_field_name(
+                "name"
+            )
 
             if (
                 name_node is not None
                 and name_node.type == "identifier"
             ):
-                name = self._text(name_node, source)
+                name = self._text(
+                    name_node,
+                    source,
+                )
 
-                if not VALID_NAME.fullmatch(name):
+                if not re.fullmatch(
+                    r"[A-Za-z_][A-Za-z0-9_]*",
+                    name,
+                ):
                     return
 
                 chunk_id = self._make_id(
@@ -129,14 +123,17 @@ class PythonParser:
                     name,
                 )
 
-                chunk = CodeChunk(
+                chunk = self._create_chunk(
+                    node=node,
+                    source=source,
+                    relative_path=relative_path,
                     chunk_id=chunk_id,
-                    chunk_type="method" if parent else "function",
+                    chunk_type=(
+                        "method"
+                        if parent
+                        else "function"
+                    ),
                     name=name,
-                    file_path=relative_path,
-                    start_line=node.start_point[0] + 1,
-                    end_line=node.end_point[0] + 1,
-                    source=self._text(node, source),
                     parent=parent,
                 )
 
@@ -153,22 +150,53 @@ class PythonParser:
                 parent,
             )
 
-    @staticmethod
-    def _apply_relationships(chunks, relationships):
-        if not chunks:
-            return
+    def _create_chunk(
+        self,
+        node,
+        source,
+        relative_path,
+        chunk_id,
+        chunk_type,
+        name,
+        parent,
+    ):
+        chunk_source = self._text(
+            node,
+            source,
+        )
 
-        imports = relationships.get("imports", [])
-        inherits_from = relationships.get("inherits_from", [])
-        calls = relationships.get("calls", [])
+        # Parse relationships INSIDE this
+        # structural chunk.
+        chunk_tree = self.parser.parse(
+            chunk_source.encode("utf-8")
+        )
 
-        chunks[0].imports = imports
-        chunks[0].inherits_from = inherits_from
-        chunks[0].calls = calls
+        relationships = self.relationships.extract(
+            chunk_tree,
+            chunk_source,
+        )
+
+        return CodeChunk(
+            chunk_id=chunk_id,
+            chunk_type=chunk_type,
+            name=name,
+            file_path=relative_path,
+            start_line=node.start_point[0] + 1,
+            end_line=node.end_point[0] + 1,
+            source=chunk_source,
+            parent=parent,
+            imports=relationships["imports"],
+            inherits_from=relationships[
+                "inherits_from"
+            ],
+            calls=relationships["calls"],
+        )
 
     @staticmethod
     def _text(node, source):
-        return source[node.start_byte:node.end_byte]
+        return source[
+            node.start_byte:node.end_byte
+        ]
 
     @staticmethod
     def _update_children(chunks):
@@ -178,12 +206,27 @@ class PythonParser:
         }
 
         for chunk in chunks:
-            if chunk.parent in by_id:
-                parent = by_id[chunk.parent]
 
-                if chunk.chunk_id not in parent.children:
-                    parent.children.append(chunk.chunk_id)
+            if chunk.parent in by_id:
+
+                parent = by_id[
+                    chunk.parent
+                ]
+
+                if (
+                    chunk.chunk_id
+                    not in parent.children
+                ):
+                    parent.children.append(
+                        chunk.chunk_id
+                    )
 
     @staticmethod
-    def _make_id(file_path, line, name):
-        return f"{file_path}:{line}:{name}"
+    def _make_id(
+        file_path,
+        line,
+        name,
+    ):
+        return (
+            f"{file_path}:{line}:{name}"
+        )
