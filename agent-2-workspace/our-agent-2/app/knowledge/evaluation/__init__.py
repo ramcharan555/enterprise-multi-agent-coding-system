@@ -1,0 +1,3 @@
+from .dataset import DEFAULT_RETRIEVAL_DATASET
+
+__all__ = ["DEFAULT_RETRIEVAL_DATASET"]
