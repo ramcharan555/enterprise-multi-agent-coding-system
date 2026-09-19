@@ -1,42 +1,6 @@
-# Python
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.mypy_cache/
-
-# Virtual environment
 .venv/
-venv/
-env/
-
-# Environment/secrets
-.env
-.env.*
-!.env.example
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Build
-build/
-dist/
-*.egg-info/
-
-# Local databases / indexes
-*.db
-*.sqlite
-*.sqlite3
-
-# RAG / generated data
-data/
-storage/
-chroma/
-vectorstore/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.key
+*.pem
