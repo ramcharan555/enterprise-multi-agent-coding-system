@@ -17,6 +17,11 @@ class CodeChunk:
     inherits_from: list[str] = field(default_factory=list)
     calls: list[str] = field(default_factory=list)
 
+    tests: list[str] = field(default_factory=list)
+
+    parameter_types: list[str] = field(default_factory=list)
+    return_type: str | None = None
+
     def to_dict(self):
         return {
             "chunk_id": self.chunk_id,
@@ -31,4 +36,7 @@ class CodeChunk:
             "imports": self.imports,
             "inherits_from": self.inherits_from,
             "calls": self.calls,
+            "parameter_types": self.parameter_types,
+            "return_type": self.return_type,
+            "tests": self.tests,
         }

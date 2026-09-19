@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import re
 
 import numpy as np
 
@@ -172,29 +173,112 @@ class HybridRetriever:
         return list(expanded.values())
 
     def symbol_score(self, query, chunk):
+        query_text = query.lower().strip()
+
+        name = chunk["name"].lower().strip()
+
+        if not name:
+            return 0.0
+
+    # Exact symbol mention.
+        if re.search(
+            rf"\b{re.escape(name)}\b",
+            query_text,
+        ):
+            return 0.50
+ 
         query_words = {
             word.lower()
-            for word in query.replace("_", " ").split()
+            for word in re.findall(
+                r"\b[a-zA-Z_][a-zA-Z0-9_]*\b",
+                query_text,
+            )
         }
 
-        name = chunk["name"].lower()
-
-        score = 0.0
-
-        # Exact symbol mention.
-        if name in query.lower():
-            score += 0.15
-
-        # Individual words from the symbol.
-        name_words = set(
-            name.replace("_", " ").split()
-        )
+        name_words = {
+            word.lower()
+            for word in name.replace("_", " ").split()
+        }
 
         overlap = query_words & name_words
 
-        score += 0.05 * len(overlap)
+        return 0.10 * len(overlap)
 
-        return score
+    def lexical_symbol_search(self, query, top_k=10):
+        query_text = query.lower()
+
+    # Common natural-language variants of code symbols.
+        aliases = {
+            "send": [
+                "send",
+                "sent",
+                "sending",
+                "request flow",
+                "http request flow",
+                "request move through",
+                "sends an http request",
+                "sends requests",
+            ],
+            "post": [
+                "post",
+                "posted",
+                "posting",
+            ],
+            "get": [
+                "get",
+                "got",
+                "getting",
+            ],
+            "request": [
+                "request",
+                "requested",
+                "requesting",
+            ],
+        }
+
+        matches = []
+
+        for chunk in self.chunks.values():
+            name = chunk.get("name", "").strip()
+
+            if not name:
+                continue
+
+            name_lower = name.lower()
+
+            search_terms = aliases.get(
+                name_lower,
+                {name_lower},
+            )
+
+            found = False
+
+            for term in search_terms:
+                pattern = (
+                    rf"(?<![a-zA-Z0-9_])"
+                    rf"{re.escape(term)}"
+                    rf"(?![a-zA-Z0-9_])"
+                )
+
+                if re.search(
+                    pattern,
+                    query_text,
+                    re.IGNORECASE,
+                ):
+                    found = True
+                    break
+
+            if found:
+                matches.append(
+                    {
+                        "chunk_id": chunk["chunk_id"],
+                        "score": 1.0,
+                        "chunk": chunk,
+                        "source": "lexical",
+                    }
+                )
+
+        return matches[:top_k]
 
     def rank_hybrid(
         self,
@@ -238,6 +322,11 @@ class HybridRetriever:
                 if result["source"] == "graph"
                 else 0.0
             )
+            lexical_bonus = (
+                0.80
+                if result["source"] == "lexical"
+                else 0.0
+            )
 
             final_score = (
                 vector_score
@@ -245,7 +334,11 @@ class HybridRetriever:
                 + type_bonus
                 + graph_bonus
                 + symbol_score
+                + lexical_bonus
             )
+
+            if symbol_score >= 0.50:
+                final_score += 0.25
 
             ranked.append(
                 {
@@ -271,12 +364,36 @@ class HybridRetriever:
         top_k=5,
     ):
         vector_results = self.vector_search(
-            query_vector,
-            top_k=vector_top_k,
+        query_vector,
+        top_k=vector_top_k,
         )
 
+        lexical_results = self.lexical_symbol_search(
+            query,
+            top_k=top_k * 2,
+        )
+
+        combined = {}
+
+        for result in vector_results:
+            combined[result["chunk_id"]] = result
+
+        for result in lexical_results:
+            chunk_id = result["chunk_id"]
+
+            if chunk_id in combined:
+             combined[chunk_id]["source"] = "lexical"
+             combined[chunk_id]["score"] = max(
+                   combined[chunk_id]["score"],
+                  result["score"],
+             )
+            else:
+                combined[chunk_id] = result
+
+        combined_results = list(combined.values())
+
         expanded_results = self.expand_graph(
-            vector_results,
+            combined_results,
         )
 
         return self.rank_hybrid(

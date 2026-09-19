@@ -58,3 +58,54 @@ class Account:
     )
 
     assert save.parent == account.chunk_id
+
+def test_parameter_type_extraction(tmp_path):
+    source = """
+class OrderRequest:
+    pass
+
+def create_order(order: OrderRequest):
+    return order
+"""
+
+    file_path = tmp_path / "orders.py"
+    file_path.write_text(source)
+
+    chunks = PythonParser().parse_file(
+        file_path,
+        "orders.py",
+    )
+
+    function = next(
+        chunk
+        for chunk in chunks
+        if chunk.name == "create_order"
+    )
+
+    assert "OrderRequest" in function.parameter_types
+
+
+def test_return_type_extraction(tmp_path):
+    source = """
+class OrderResponse:
+    pass
+
+def create_order() -> OrderResponse:
+    return OrderResponse()
+"""
+
+    file_path = tmp_path / "orders.py"
+    file_path.write_text(source)
+
+    chunks = PythonParser().parse_file(
+        file_path,
+        "orders.py",
+    )
+
+    function = next(
+        chunk
+        for chunk in chunks
+        if chunk.name == "create_order"
+    )
+
+    assert function.return_type == "OrderResponse"

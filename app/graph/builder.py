@@ -33,17 +33,41 @@ class CodeGraphBuilder:
                 )
 
             for target in chunk.get("imports", []):
-                self._edge(source, target, "IMPORTS")
+                self._edge(
+                    source,
+                    target,
+                    "IMPORTS",
+                )
 
             for target in chunk.get("inherits_from", []):
-                self._edge(source, target, "INHERITS_FROM")
+                self._edge(
+                    source,
+                    target,
+                    "INHERITS_FROM",
+                )
 
             for target in chunk.get("calls", []):
-                self._edge(source, target, "CALLS")
+                self._edge(
+                    source,
+                    target,
+                    "CALLS",
+                )
+
+            for target in chunk.get("tests", []):
+                self._edge(
+                    source,
+                    target,
+                    "TESTS",
+                )
 
         return self.graph
 
-    def _edge(self, source, target, relationship):
+    def _edge(
+        self,
+        source,
+        target,
+        relationship,
+    ):
         self.graph.add_edge(
             source,
             target,
@@ -52,6 +76,7 @@ class CodeGraphBuilder:
 
     def save(self, output_path):
         output_path = Path(output_path)
+
         output_path.parent.mkdir(
             parents=True,
             exist_ok=True,
@@ -63,6 +88,9 @@ class CodeGraphBuilder:
         )
 
         output_path.write_text(
-            json.dumps(data, indent=2),
+            json.dumps(
+                data,
+                indent=2,
+            ),
             encoding="utf-8",
         )

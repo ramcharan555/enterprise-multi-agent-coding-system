@@ -6,14 +6,17 @@ from app.agents.dependency import DependencyAgent
 
 class AgentOrchestrator:
 
-    def __init__(self, router, repository_search=None):
+    def __init__(self, router, toolkit=None, repository_search=None):
         self.router = router
 
+        if toolkit is None and repository_search is not None:
+            toolkit = repository_search
+
         self.agents = {
-            "location": LocatorAgent(repository_search),
-            "explanation": ExplainerAgent(),
-            "debugging": DebuggerAgent(),
-            "dependency": DependencyAgent(),
+            "location": LocatorAgent(toolkit),
+            "explanation": ExplainerAgent(toolkit),
+            "debugging": DebuggerAgent(toolkit),
+            "dependency": DependencyAgent(toolkit),
         }
 
     def run(self, query, context=None):
@@ -32,16 +35,22 @@ class AgentOrchestrator:
                 "result": None,
             }
 
-        # Location agent needs repository_search.
-        # Tests can run without it.
-        if intent == "location" and getattr(agent, "repository_search", None) is None:
+        if intent in {
+            "location",
+            "explanation",
+            "debugging",
+            "dependency",
+        } and agent.toolkit is None:
             result = {
                 "agent": agent.name,
                 "query": query,
-                "task": "locate",
-                "results": [],
+                "task": agent.name,
                 "context": context or [],
             }
+
+            if intent == "location":
+                result["results"] = []
+
         else:
             result = agent.run(
                 query,

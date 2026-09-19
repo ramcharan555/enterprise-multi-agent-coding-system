@@ -87,3 +87,45 @@ def test_parent_relationship():
         graph["a.py:2:foo"]["a.py:1:A"]["relationship"]
         == "DEFINED_IN"
     )
+
+def test_test_relationship():
+    chunks = [
+        {
+            "chunk_id": "a.py:1:foo",
+            "chunk_type": "function",
+            "name": "foo",
+            "file_path": "a.py",
+            "start_line": 1,
+            "end_line": 3,
+            "parent": None,
+            "imports": [],
+            "inherits_from": [],
+            "calls": [],
+            "tests": [],
+        },
+        {
+            "chunk_id": "test_a.py:1:test_foo",
+            "chunk_type": "function",
+            "name": "test_foo",
+            "file_path": "test_a.py",
+            "start_line": 1,
+            "end_line": 3,
+            "parent": None,
+            "imports": [],
+            "inherits_from": [],
+            "calls": [],
+            "tests": ["foo"],
+        },
+    ]
+
+    graph = CodeGraphBuilder().build(chunks)
+
+    assert graph.has_edge(
+        "test_a.py:1:test_foo",
+        "foo",
+    )
+
+    assert (
+        graph["test_a.py:1:test_foo"]["foo"]["relationship"]
+        == "TESTS"
+    )

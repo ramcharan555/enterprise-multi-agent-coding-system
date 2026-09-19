@@ -150,6 +150,74 @@ class PythonParser:
                 parent,
             )
 
+    def _extract_types(self, node, source):
+        parameter_types = []
+        return_type = None
+
+        parameters = node.child_by_field_name(
+            "parameters"
+        )
+
+        if parameters is not None:
+            for child in parameters.children:
+
+                if child.type in {
+                    "typed_parameter",
+                    "typed_default_parameter",
+                    "identifier",
+                }:
+                    type_node = child.child_by_field_name(
+                        "type"
+                    )
+
+                    if type_node is not None:
+                        parameter_types.append(
+                            self._text(
+                                type_node,
+                                source,
+                            ).strip()
+                        )
+
+        return_node = node.child_by_field_name(
+            "return_type"
+        )
+
+        if return_node is not None:
+            return_type = self._text(
+                return_node,
+                source,
+            ).strip()
+
+        return parameter_types, return_type
+
+    def _extract_test_targets(self, node, source):
+        targets = []
+
+        def walk(current):
+            if current.type == "call":
+                function_node = current.child_by_field_name(
+                    "function"
+                )
+
+                if function_node is not None:
+                    name = self._text(
+                        function_node,
+                        source,
+                    )
+
+                    if name:
+                        targets.append(
+                            name.split(".")[-1]
+                        )
+
+            for child in current.children:
+                walk(child)
+
+        walk(node)
+
+        return list(
+            dict.fromkeys(targets)
+        )
     def _create_chunk(
         self,
         node,
@@ -176,6 +244,33 @@ class PythonParser:
             chunk_source,
         )
 
+        parameter_types = []
+        return_type = None
+
+        if node.type in {
+            "function_definition",
+            "async_function_definition",
+        }:
+            parameter_types, return_type = (
+                self._extract_types(
+                    node,
+                    source,
+                )
+            )
+
+        tests = []
+
+        if (
+            chunk_type in {
+                "function",
+                "method",
+            }
+            and name.startswith("test_")
+        ):
+            tests = self._extract_test_targets(
+                node,
+                source,
+            )
         return CodeChunk(
             chunk_id=chunk_id,
             chunk_type=chunk_type,
@@ -190,6 +285,9 @@ class PythonParser:
                 "inherits_from"
             ],
             calls=relationships["calls"],
+            parameter_types=parameter_types,
+            return_type=return_type,
+            tests=tests,
         )
 
     @staticmethod

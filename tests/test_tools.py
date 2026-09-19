@@ -47,3 +47,33 @@ def test_graph_traversal_tool():
 
     assert result[0]["chunk_id"] == "abc"
     assert result[0]["max_neighbors"] == 10
+
+def test_symbol_lookup_types():
+
+    chunks = [
+        {
+            "name": "create_order",
+            "parameter_types": ["OrderRequest"],
+            "return_type": "OrderResponse",
+        },
+        {
+            "name": "OrderRequest",
+        },
+        {
+            "name": "OrderResponse",
+        },
+    ]
+
+    tool = SymbolLookupTool(chunks)
+
+    result = tool.lookup_types(
+        chunks[0]
+    )
+
+    names = {
+        chunk["name"]
+        for chunk in result
+    }
+
+    assert "OrderRequest" in names
+    assert "OrderResponse" in names

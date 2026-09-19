@@ -5,9 +5,6 @@ class LocatorAgent(BaseAgent):
 
     name = "locator"
 
-    def __init__(self, toolkit):
-        self.toolkit = toolkit
-
     def run(self, query, context=None):
         results = self.toolkit.search_repository(
             query,

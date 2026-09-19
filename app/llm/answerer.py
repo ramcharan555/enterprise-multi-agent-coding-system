@@ -1,4 +1,5 @@
 from app.llm.prompts import SYSTEM_PROMPT, build_prompt
+from app.llm.evidence import build_evidence, source_metadata, validate_citations
 
 
 class CodeAnswerer:
@@ -14,11 +15,22 @@ class CodeAnswerer:
                     "context to answer this question."
                 ),
                 "sources": [],
+                "evidence": [],
+                "citations": [],
+                "citation_validation": {
+                    "is_valid": True,
+                    "has_citations": False,
+                    "missing_citations": True,
+                    "valid_evidence_ids": [],
+                    "invalid_evidence_ids": [],
+                },
             }
 
+        evidence = build_evidence(context)
         user_prompt = build_prompt(
             query,
             context,
+            evidence,
         )
 
         answer = self.llm_client.generate(
@@ -27,10 +39,18 @@ class CodeAnswerer:
         )
 
         sources = self._build_sources(context)
+        citation_validation = validate_citations(answer, evidence)
+        evidence_by_id = {item["evidence_id"]: item for item in evidence}
 
         return {
             "answer": answer,
             "sources": sources,
+            "evidence": evidence,
+            "citations": [
+                evidence_by_id[evidence_id]
+                for evidence_id in citation_validation["valid_evidence_ids"]
+            ],
+            "citation_validation": citation_validation,
         }
 
     def _build_sources(self, context):
@@ -39,17 +59,12 @@ class CodeAnswerer:
         seen = set()
 
         for item in context:
-            source = {
-                "file_path": item["file_path"],
-                "start_line": item["start_line"],
-                "end_line": item["end_line"],
-                "name": item["name"],
-            }
+            source = source_metadata(item)
 
             key = (
-                source["file_path"],
-                source["start_line"],
-                source["end_line"],
+            source["chunk_id"],
+            source["start_line"],
+            source["end_line"],
             )
 
             if key not in seen:

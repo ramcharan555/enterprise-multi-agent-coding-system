@@ -1,4 +1,6 @@
 pathspec>=0.12.1
 pytest>=8.0
+fastapi>=0.110
+uvicorn>=0.29
 tree-sitter>=0.25.0
 tree-sitter-python>=0.25.0
