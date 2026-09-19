@@ -1,3 +1,6 @@
+from app.knowledge.integrations.llamaindex.adapter import LlamaIndexAdapter
+
+
 def test_llamaindex_adapter_builds_index():
     adapter = LlamaIndexAdapter()
 
